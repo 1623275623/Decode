@@ -19,7 +19,7 @@ Decode::Decode(nvjpegOutputFormat_t output_format,nvjpegBackend_t Bankend)
 
 
 
-int Decode::DecodeImage(unsigned char* data, size_t length, nvjpegImage_t * image, nvjpegOutputFormat_t output_fmt, cudaStream_t & stream)
+int Decode::DecodeImage(unsigned char* data, size_t length, nvjpegImage_t * image,  cudaStream_t & stream)
 {
 
     cudaEvent_t start, stop;
@@ -71,6 +71,9 @@ Decode::~Decode()
 
 
 
+//测试代码
+
+
 #include <fstream>
 #include <opencv2/opencv.hpp>
 #include <memory>
@@ -84,7 +87,7 @@ int main()
     char* data = new char[size]; //为存储图片数据创建存储空间
     
 
-    //使用
+   
     input_file.read(data, size);  //读取图片数据，将其放入存储空间
 
 
@@ -95,7 +98,7 @@ int main()
     nvjpegImage_t image;
     cudaMalloc((void**)&image.channel[0], 3840 * 2160 * 3);   //创建空间用来存放解码后的图像数据
     image.pitch[0] = 3840 * 3;
-    decode.DecodeImage((unsigned char*)data, size, &image,NVJPEG_OUTPUT_BGRI,stream); //调用函数进行图像的解码 前两个参数分别是图像数据，以及图像数据的长度
+    decode.DecodeImage((unsigned char*)data, size, &image,stream); //调用函数进行图像的解码 前两个参数分别是图像数据，以及图像数据的长度
 
 
 
@@ -103,7 +106,7 @@ int main()
     /*checkCudaErrors(cudaMemcpy2D(chanRGB, (size_t)width * 3, d_RGB, (size_t)pitch,
         width * 3, height, cudaMemcpyDeviceToHost));*/
     
-     //将数据从GPU拷贝到CPU
+     //将数据从GPU拷贝到CPU 参数依次是 拷贝目的地 拷贝目的地的pitch 拷贝出发点 拷贝出发点的pitch 宽 高
     cudaMemcpy2D(data2,size_t(3840*3),image.channel[0],image.pitch[0],3840*3,2160, cudaMemcpyDeviceToHost);
    // cv::imshow("asd", img);
     //std::destroy_at(&decode); 
@@ -119,5 +122,7 @@ int main()
     delete[] data;
     delete[] data2;
     cudaFree(image.channel[0]);
+
+    return 0;
 
 }

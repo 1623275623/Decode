@@ -63,13 +63,24 @@ class Decode
 public:
 	decode_params_t params;
 
-
+    /*
+    参数1 设置图片输出格式
+    参数2 设置解码后端
+    */
 	Decode(nvjpegOutputFormat_t output_format=NVJPEG_OUTPUT_BGRI, nvjpegBackend_t Bankend=NVJPEG_BACKEND_GPU_HYBRID);
 
 
-	int DecodeImage(unsigned char* data, size_t length, nvjpegImage_t* image,nvjpegOutputFormat_t output_fmt,cudaStream_t& stream);
+
+    /*
+    * 参数1 传入解码图像数据
+    * 参数2 传入数据大小
+    * 参数3 解码后数据存放的对象 对象在CPu上，解码得到的数据在GPU端
+    * 参数4 Cuda 流
+    */
+	int DecodeImage(unsigned char* data, size_t length, nvjpegImage_t* image,cudaStream_t& stream);
 
 
+    //析构函数自动析构构造函数创建的资源
 	~Decode();
 };
 
