@@ -17,6 +17,17 @@ int dev_free(void* p) { return (int)cudaFree(p); }
 nvjpegDevAllocator_t dev_allocator = { &dev_malloc, &dev_free };
 nvjpegPinnedAllocator_t pinned_allocator = { &host_malloc, &host_free };
 
+#define CHECK_CUDA(call)                                                                                \
+    {                                                                                                       \
+        cudaError_t _e = (call);                                                                       \
+        if ( _e != cudaSuccess)                                                                  \
+        {                                                                                                   \
+            std::cout << "CUDA failure: '#" << _e << "' at " << __FILE__ << ":" << __LINE__ << std::endl; \
+                                                                                        \
+        }                                                                                                   \
+    }
+
+
 #define CHECK_NVJPEG(call)                                                                                \
     {                                                                                                       \
         nvjpegStatus_t _e = (call);                                                                       \
@@ -27,12 +38,10 @@ nvjpegPinnedAllocator_t pinned_allocator = { &host_malloc, &host_free };
         }                                                                                                   \
     }
 
+
 struct decode_params_t {
-	std::string input_dir;
-	int batch_size;
-	int total_images;
-	int dev;
-	int warmup;
+
+
 
 	nvjpegJpegState_t nvjpeg_state;
 	nvjpegHandle_t nvjpeg_handle;
@@ -46,11 +55,6 @@ struct decode_params_t {
 	nvjpegDecodeParams_t nvjpeg_decode_params;
 	nvjpegJpegDecoder_t nvjpeg_decoder;
 
-	nvjpegOutputFormat_t fmt;
-	bool write_decoded;
-	std::string output_dir;
-
-	
 };
 
 
@@ -60,11 +64,10 @@ public:
 	decode_params_t params;
 
 
-	Decode();
+	Decode(nvjpegOutputFormat_t output_format=NVJPEG_OUTPUT_BGRI, nvjpegBackend_t Bankend=NVJPEG_BACKEND_GPU_HYBRID);
 
 
-	
-	int DecodeImage(unsigned char* data, size_t length, nvjpegImage_t* image,cudaStream_t& stream);
+	int DecodeImage(unsigned char* data, size_t length, nvjpegImage_t* image,nvjpegOutputFormat_t output_fmt,cudaStream_t& stream);
 
 
 	~Decode();
